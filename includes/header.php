@@ -1,77 +1,59 @@
 <?php
-// Kiểm tra xem người dùng có đăng nhập không
-$isLoggedIn = isset($_SESSION['user_id']);
-$userRole = $isLoggedIn ? $_SESSION['role'] : '';
-$activeClass = function($page) {
-    $current = basename($_SERVER['PHP_SELF']);
-    return ($current == $page) ? 'active' : '';
-};
-?>
+// includes/header.php - Header component for all pages
 
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Include functions file if not already included
+if (!function_exists('is_logged_in')) {
+    require_once $_SERVER['DOCUMENT_ROOT'] . '/beautyclick/includes/functions.php';
+}
+
+// Get messages for alert display
+$messages = get_messages();
+?>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($pageTitle) ? $pageTitle . ' - ' : ''; ?>Beauty Makeup Studio</title>
+    <title><?php echo isset($page_title) ? $page_title . ' - BeautyClick' : 'BeautyClick - Student Makeup Booking'; ?></title>
     
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="/beautyclick/assets/css/style.css">
     
-    <?php if (isset($extraCSS)) echo $extraCSS; ?>
+    <?php if (isset($additional_css)): ?>
+        <?php foreach ($additional_css as $css): ?>
+            <link rel="stylesheet" href="<?php echo $css; ?>">
+        <?php endforeach; ?>
+    <?php endif; ?>
 </head>
 <body>
     <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="nav-container">
-                <a href="index.php" class="logo">
-                    <i class="fas fa-spa"></i> Beauty Makeup
-                </a>
-                
-                <button class="mobile-menu-toggle" id="mobileMenuToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                
-                <ul class="main-nav" id="mainNav">
-                    <li><a href="index.php" class="<?php echo $activeClass('index.php'); ?>">Trang chủ</a></li>
-                    <li><a href="services.php" class="<?php echo $activeClass('services.php'); ?>">Dịch vụ</a></li>
-                    <li><a href="artists.php" class="<?php echo $activeClass('artists.php'); ?>">Nghệ sĩ</a></li>
-                    <li><a href="gallery.php" class="<?php echo $activeClass('gallery.php'); ?>">Thư viện</a></li>
-                    <li><a href="contact.php" class="<?php echo $activeClass('contact.php'); ?>">Liên hệ</a></li>
-                    
-                    <?php if ($isLoggedIn): ?>
-                        <li><a href="my-bookings.php" class="<?php echo $activeClass('my-bookings.php'); ?>">Lịch hẹn của tôi</a></li>
-                        
-                        <?php if ($userRole == 'artist'): ?>
-                            <li><a href="artist-profile.php" class="<?php echo $activeClass('artist-profile.php'); ?>">Hồ sơ nghệ sĩ</a></li>
-                        <?php elseif ($userRole == 'admin'): ?>
-                            <li><a href="admin/dashboard.php">Quản trị</a></li>
-                        <?php endif; ?>
-                    <?php endif; ?>
-                </ul>
-                
-                <div class="auth-buttons">
-                    <?php if ($isLoggedIn): ?>
-                        <div class="user-menu">
-                            <a href="profile.php" class="btn btn-sm btn-outline">
-                                <i class="fas fa-user"></i> <?php echo htmlspecialchars($_SESSION['fullname']); ?>
-                            </a>
-                            <a href="logout.php" class="btn btn-sm btn-primary">Đăng xuất</a>
-                        </div>
-                    <?php else: ?>
-                        <a href="login.php" class="btn btn-sm btn-outline">Đăng nhập</a>
-                        <a href="register.php" class="btn btn-sm btn-primary">Đăng ký</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
+    <header>
+        <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/beautyclick/includes/navbar.php'; ?>
     </header>
+    
+    <!-- Main Content Container -->
+    <main class="container py-4">
+        <?php if (isset($messages['success']) && $messages['success']): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <?php echo $messages['success']; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (isset($messages['error']) && $messages['error']): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php echo $messages['error']; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
